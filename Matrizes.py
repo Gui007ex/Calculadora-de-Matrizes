@@ -1,11 +1,11 @@
-from math import cos, sin, radians as rad
 import os
+from math import cos, sin, radians as rad
 from fractions import Fraction as frac
 from random import choice
 os.system('color 1')
 
 #Variáveis pra facilitar minha vida
-versao = '2.4'
+versao = '2.45'
 banco_de_matriz = []
 banco_de_vetores = []
 comandos = '''
@@ -29,6 +29,7 @@ comandosV = '''
 (Ro) para rotação
 (Re) para reflexão
 (T) para transposição
+(P) para projeção
 -----------------------------------
 (M) para área de matrizes
 (E) para sair
@@ -484,6 +485,29 @@ def Reflect2D(vector,axis):
     elif Compare(axis,"Y"):
         return [[-vector[0][0]],[vector[1][0]]]
 
+def Reflect3D(vector,axis):
+    if Compare(axis,"X"):
+        return [[vector[0][0]],[-vector[1][0]],[-vector[2][0]]]
+    elif Compare(axis,"Y"):
+        return [[-vector[0][0]],[vector[1][0]],[-vector[2][0]]]
+    elif Compare(axis,"Z"):
+        return [[-vector[0][0]],[-vector[1][0]],[vector[2][0]]]
+
+def Projection2D(vector,eixo):
+    if Compare(eixo,"X"):
+        return [[vector[0][0]],[0]]
+    elif Compare(eixo,"Y"):
+        return [[0],[vector[1][0]]]
+
+def Projection3D(vector,eixo):
+    if Compare(eixo,"X"):
+        return [[vector[0][0]],[0],[0]]
+    elif Compare(eixo,"Y"):
+        return [[0],[vector[1][0]],[0]]
+    elif Compare(eixo,"Z"):
+        return [[0],[0],[vector[2][0]]]
+
+
 #Parte da interface para o usuário:
 while not Compare(entry,"E"):
     print(intro)
@@ -902,12 +926,13 @@ while not Compare(entry,"E"):
                                 dx = Get("Dx:")
                                 if dx!='Error':
                                     dy = Get("Dy:")
-                                    if dy!='Error' and len(banco_de_vetores[k-1]) == 2:
-                                        break
-                                    else:
-                                        dz = Get("Dz:")
-                                        if dz!='Error':
+                                    if dy!='Error':
+                                        if len(banco_de_vetores[k-1]) == 2:
                                             break
+                                        else:
+                                            dz = Get("Dz:")
+                                            if dz!='Error':
+                                                break
                                 SetIntro(area_name)
                             if len(banco_de_vetores[k-1]) == 2:
                                 new_vector = Translacao2D(banco_de_vetores[k-1],dx,dy)
@@ -950,7 +975,7 @@ while not Compare(entry,"E"):
                             SetIntro(area_name)
                             ShowUnit(banco_de_vetores[k-1])
                             while True:
-                                axis = input("Refletir no eixo:")
+                                axis = input("\nEixo:")
                                 if len(banco_de_vetores[k-1]) == 2:
                                     if CompareSegment(axis,"XY"):
                                         break
@@ -959,13 +984,61 @@ while not Compare(entry,"E"):
                                         break
                                 SetIntro(area_name)
                                 ShowUnit(banco_de_vetores[k-1])
-                                print()
                             if len(banco_de_vetores[k-1]) == 2:
                                 new_vector = Reflect2D(banco_de_vetores[k-1],axis)
                             else:
-                                #Colocar função para reflexão 3d
-                                pass
+                                new_vector = Reflect3D(banco_de_vetores[k-1],axis)
                             print("\nVetor refletido no eixo {}:\n".format(axis))
+                            ShowUnit(new_vector)
+                            next = input('\n(A) para adicionar vetor ao banco\nQualquer outro para sair sem adicionar\n\nInput:')
+                            if Compare(next,"A"):
+                                Adicionar(new_vector,banco_de_vetores)
+                                print('\nVetor adicionado')
+                            else:
+                                print('\nVetor não adicionado')
+                            break
+                        else:
+                            SetIntro(area_name)
+                    else:
+                        print("\nSem vetores para calcular :(")
+                        break
+                input("\nEnter para continuar")
+
+            #Acesso à projeção de vetores
+            elif Compare(entry,"P"):
+                area_name = "Projeção de vetor:"
+                while True:
+                    SetIntro(area_name)
+                    if len(banco_de_vetores):
+                        while True:
+                            k = Get('Número do vetor:')
+                            print()
+                            if k == "Error":
+                                SetIntro(area_name)
+                            if Find(k,area_name,"Vetor",banco_de_vetores):
+                                break
+                        while True:
+                            conf = input('\nConfirmar vetor? (S) ou (N):')
+                            if Compare(conf,"S") or Compare(conf,"N"):
+                                break
+                        if Compare(conf,"S"):
+                            SetIntro(area_name)
+                            ShowUnit(banco_de_vetores[k-1])
+                            while True:
+                                axis = input("\nEixo:")
+                                if len(banco_de_vetores[k-1]) == 2:
+                                    if CompareSegment(axis,"XY"):
+                                        break
+                                else:
+                                    if CompareSegment(axis,"XYZ"):
+                                        break
+                                SetIntro(area_name)
+                                ShowUnit(banco_de_vetores[k-1])
+                            if len(banco_de_vetores[k-1]) == 2:
+                                new_vector = Projection2D(banco_de_vetores[k-1],axis)
+                            else:
+                                new_vector = Projection3D(banco_de_vetores[k-1],axis)
+                            print("\nProjeção no eixo {}:\n".format(axis))
                             ShowUnit(new_vector)
                             next = input('\n(A) para adicionar vetor ao banco\nQualquer outro para sair sem adicionar\n\nInput:')
                             if Compare(next,"A"):
