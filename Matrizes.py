@@ -5,11 +5,10 @@ from random import choice
 os.system('color 1')
 
 #Variáveis pra facilitar minha vida
-versao = '2.45'
+versao = '3.0'
 banco_de_matriz = []
 banco_de_vetores = []
 comandos = '''
-(B) para mostrar banco de matrizes
 (A) para adicionar matriz
 (S) para substituir valor
 (D) para calcular determinante
@@ -19,18 +18,22 @@ comandos = '''
 (R) para resolução de sistema
 (T) para transposta
 -----------------------------------
+(B) para mostrar banco de matrizes
+(L) para limpar banco
 (V) para área de vetores
 (E) para sair
 
 Comando:'''
 comandosV = '''
-(B) para mostrar banco de vetores
 (A) para adicionar vetor
 (Ro) para rotação
 (Re) para reflexão
 (T) para transposição
 (P) para projeção
+(C) para cisalhamento
 -----------------------------------
+(B) para mostrar banco de vetores
+(L) para limpar banco
 (M) para área de matrizes
 (E) para sair
 
@@ -126,6 +129,9 @@ def Win(grid):
     return False
 
 # Funções de utilidade
+def Remove():
+    return []
+
 def Compare(ent,str):
     if ent == str or ent == str.lower():
         return True
@@ -430,29 +436,33 @@ def AddVector(dim):
     banco_de_vetores.append(vector)
     
 def Rotate2D(vector,angle):
+    sub_vector = CopyMatrix(vector)
+    sub_vector.append([1])
     c = cos(rad(angle))+1-1
     s = sin(rad(angle))+1-1
-    mult_vector = [[c,-s],[s,c]]
-    result_vector = Multiplicar(mult_vector,vector)
-    return result_vector
+    mult_vector = [[c,-s,0],[s,c,0],[0,0,1]]
+    result_vector = Multiplicar(mult_vector,sub_vector)
+    return result_vector[:2]
 
 def Rotate3D(vector,angle,eixo):
+    sub_vector = CopyMatrix(vector)
+    sub_vector.append([1])
     c = cos(rad(angle))+1-1
     s = sin(rad(angle))+1-1
     if Compare(eixo,"X"):
-        mult_vector = [[1,0,0],[0,c,-s],[0,s,c]]
+        mult_vector = [[1,0,0,0],[0,c,-s,0],[0,s,c,0],[0,0,0,1]]
     elif Compare(eixo,"Y"):
-        mult_vector = [[c,0,s],[0,1,0],[-s,0,c]]
+        mult_vector = [[c,0,s,0],[0,1,0,0],[-s,0,c,0],[0,0,0,1]]
     elif Compare(eixo,"Z"):
-        mult_vector = [[c,-s,0],[s,c,0],[0,0,1]]
+        mult_vector = [[c,-s,0,0],[s,c,0,0],[0,0,1,0],[0,0,0,1]]
     
-    result_vector = Multiplicar(mult_vector,vector)
-    return result_vector
+    result_vector = Multiplicar(mult_vector,sub_vector)
+    return result_vector[:3]
 
 def Translacao2D(vector,dx,dy):
-        idTranslacao = [[1,0,dx],[0,1,dy],[0,0,1]]
         sub_vector = CopyMatrix(vector)
         sub_vector.append([1])
+        idTranslacao = [[1,0,dx],[0,1,dy],[0,0,1]]
         translacao = [[],[],[]]
 
         somat=0
@@ -465,9 +475,9 @@ def Translacao2D(vector,dx,dy):
         return translacao[:2]
 
 def Translacao3D(vector,dx,dy,dz):
-        idTranslacao = [[1,0,0,dx],[0,1,0,dy],[0,0,1,dz],[0,0,0,1]]
         sub_vector = CopyMatrix(vector)
         sub_vector.append([1])
+        idTranslacao = [[1,0,0,dx],[0,1,0,dy],[0,0,1,dz],[0,0,0,1]]
         translacao = [[],[],[],[]]
 
         somat=0
@@ -507,6 +517,16 @@ def Projection3D(vector,eixo):
     elif Compare(eixo,"Z"):
         return [[0],[0],[vector[2][0]]]
 
+def Cisilh2D(vector,eixo,k):
+    sub_vector = CopyMatrix(vector)
+    sub_vector.append([1])
+    if Compare(eixo,"X"):
+        mult_vector = [[1,k,0],[0,1,0],[0,0,1]]
+    elif Compare(eixo,"Y"):
+        mult_vector = [[1,0,0],[k,1,0],[0,0,1]]
+    result_vector = Multiplicar(mult_vector,sub_vector)
+    return result_vector[:2]
+    
 
 #Parte da interface para o usuário:
 while not Compare(entry,"E"):
@@ -827,6 +847,10 @@ while not Compare(entry,"E"):
 
         input('\nEnter para continuar')
 
+    #Limpar o banco
+    elif Compare(entry,"L"):
+        banco_de_matriz = []
+
     #Acesso aos vetores
     elif Compare(entry,"V"):
         while True:
@@ -1054,9 +1078,75 @@ while not Compare(entry,"E"):
                         break
                 input("\nEnter para continuar")
 
+            #Acesso ao cisalhamento
+            elif Compare(entry,"C"):
+                area_name = "Cisalhamento:"
+                while True:
+                    SetIntro(area_name)
+                    if len(banco_de_vetores):
+                        while True:
+                            k = Get('Número do vetor:')
+                            print()
+                            if k == "Error":
+                                SetIntro(area_name)
+                            if Find(k,area_name,"Vetor",banco_de_vetores): 
+                                break
+                        while True:
+                            conf = input('\nConfirmar vetor? (S) ou (N):')
+                            if Compare(conf,"S") or Compare(conf,"N"):
+                                break
+                        if Compare(conf,"S"):
+                            #Quebra temporária caso vetor seja 3D
+                            if len(banco_de_vetores[k-1]) == 3:
+                                SetIntro(area_name)
+                                print('Ops, a versão {} ainda não suporta cisalhamento 3D :('.format(versao))
+                                break
+                            SetIntro(area_name)
+                            ShowUnit(banco_de_vetores[k-1])
+                            while True:
+                                axis = input("\nEixo:")
+                                if len(banco_de_vetores[k-1]) == 2:
+                                    if CompareSegment(axis,"XY"):
+                                        break
+                                else:
+                                    if CompareSegment(axis,"XYZ"):
+                                        break
+                                SetIntro(area_name)
+                                ShowUnit(banco_de_vetores[k-1])
+                            while True:
+                                factor = Get("Fator:")
+                                if factor != 'Error':
+                                    break
+                            if len(banco_de_vetores[k-1]) == 2:
+                                new_vector = Cisilh2D(banco_de_vetores[k-1],axis,factor)
+                            else:
+                                pass
+                            print("\nCisalhamento de fator {} no eixo {}:\n".format(factor,axis))
+                            ShowUnit(new_vector)
+                            next = input('\n(A) para adicionar vetor ao banco\nQualquer outro para sair sem adicionar\n\nInput:')
+                            if Compare(next,"A"):
+                                Adicionar(new_vector,banco_de_vetores)
+                                print('\nVetor adicionado')
+                            else:
+                                print('\nVetor não adicionado')
+                            break
+                        else:
+                            SetIntro(area_name)
+                    else:
+                        print("\nSem vetores para calcular :(")
+                        break
+                input("\nEnter para continuar")
+
+            #Limpar banco
+            elif Compare(entry,"L"):
+                banco_de_vetores = []
+
             #Saída de vetores/programa
             elif Compare(entry,"M") or Compare(entry,"E"):
                 break
+
+            else:
+                SetColor(entry)
 
     #Acesso ao 2048
     elif entry == '2048':
