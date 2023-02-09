@@ -4,7 +4,6 @@ from fractions import Fraction as frac
 from random import choice
 os.system('color 1')
 
-#Variáveis pra facilitar minha vida
 versao = '3.0'
 banco_de_matriz = []
 banco_de_vetores = []
