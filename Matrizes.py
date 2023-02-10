@@ -46,12 +46,6 @@ askV = '''
 (3) Vetor 3D
 
 Input:'''
-#Acabaram as variáveis
-
-#To do
-'''
-Reduzir passos do método Gaussiano
-'''
 
 # Funções do 2048
 def Show2048(x):
@@ -170,11 +164,13 @@ def IsLadder(matriz):
     return True
 
 def Purify(linha):
+    #Verificar e tirar zeros negativos da lista
     for i in range(len(linha)):
         if linha[i] == -0:
             linha[i] = 0
 
 def Aproximate(matriz):
+    #Aproximar valores com casas decimais quebradas de até 4 digitos
     for i in range(len(matriz)):
         for j in range(len(matriz[i])):
             if matriz[i][j]%1 == 0 or matriz[i][j]%1 == -0:
@@ -185,6 +181,7 @@ def Aproximate(matriz):
                     matriz[i][j] = int(matriz[i][j])
 
 def CopyMatrix(matriz):
+    #Copiar matriz
     copy = []
     for i in range(len(matriz)):
         copy.append([])
@@ -193,6 +190,7 @@ def CopyMatrix(matriz):
     return copy
 
 def Get(string):
+    #Verificar veracidade da string
     try:
         return int(input(string))
     except:
@@ -200,6 +198,7 @@ def Get(string):
         return 'Error'
 
 def ShowUnit(matriz):
+    #Recebo e mostro uma matriz na interface
     show, show_size = [], 1
 
     for i in range(len(matriz)):
@@ -215,6 +214,7 @@ def ShowUnit(matriz):
         print('[' + ' '.join(map(str, linha)) + ']')
 
 def GenSyst(matriz):
+    #Gerar um sistema baseado na matriz
     equals = [0 for i in range(len(matriz[0]))]
     eqLine = [[] for i in range(len(matriz))]
 
@@ -234,6 +234,7 @@ def GenSyst(matriz):
     return equals
 
 def SetColor(string):
+    #Mudar a cor do cmd
     color_codes = ['1','2','3','4','5','6','7','8','d']
     color_names = ['blue','green','cian','red','purple','yellow','white','grey','pink']
     try:
@@ -242,6 +243,7 @@ def SetColor(string):
         pass
 
 def ShowBank(bank, element):
+    #Mostar elementos do banco
     for el in range(len(bank)):
         print(f'{element}:{el+1}')
         ShowUnit(bank[el])
