@@ -1,3 +1,4 @@
+#A
 import os
 from math import cos, sin, radians as rad
 from fractions import Fraction as frac
